@@ -1,6 +1,7 @@
 *.pt
 tensorboard
 tensorboard/\*
+dexgrasp_generation/runs
 
 
 # Byte-compiled / optimized / DLL files
