@@ -117,7 +117,9 @@ def main(cfg):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config-name", type=str, default="ipdf_config")
+    parser.add_argument("--cuda-id", type=int, default=0)
     parser.add_argument("--exp-dir", type=str, help="E.g., './ipdf_train'.")
+    
     return parser.parse_args()
 
 
