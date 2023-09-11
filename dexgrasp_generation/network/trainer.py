@@ -183,6 +183,7 @@ class Trainer(nn.Module):
         self.log_string("Saving model at epoch {}, path {}".format(epoch, savepath))
 
     def update(self, data):
+        torch.cuda.empty_cache() 
         self.optimizer.zero_grad()
         self.model.train()
         self.model.set_data(data)
