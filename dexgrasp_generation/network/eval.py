@@ -50,6 +50,7 @@ def main(cfg):
     trainers = []
     for key in cfg['models'].keys():
         net_cfg = compose(f"{cfg['models'][key]['type']}_config")
+        print(net_cfg['exp_dir'])
         with open_dict(net_cfg):
             net_cfg['device'] = cfg['device']
         trainer = Trainer(net_cfg, logger)

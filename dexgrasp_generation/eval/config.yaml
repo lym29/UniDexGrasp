@@ -30,9 +30,9 @@ exp_dir: ./eval
 wandb_offline: true
 wandb_debug_mode: true
 resume_epoch: -1
-cuda_id: 0
+cuda_id: 3
 num_workers: 1
-batch_size: 16
+batch_size: 8
 n_samples: 100
 dataset:
   root_path: data
@@ -50,5 +50,5 @@ dataset:
   shadow_hand_mesh_dir: mjcf/meshes
   shadow_urdf_path: mjcf/shadow_hand.xml
   fps: true
-device: cuda:0
+device: cuda:3
 
