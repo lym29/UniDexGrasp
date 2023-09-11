@@ -36,7 +36,7 @@ q1:
     lambda_torque: 10
 
 # dirs
-exp_dir: ./runs/exp_tmp
+exp_dir: ./runs/eval
 
 # wandb
 wandb_offline: True
