@@ -151,3 +151,5 @@ exp
 logs/
 
 dexgrasp_generation/thirdparty/CSDF
+dexgrasp_generation/configs/eval_config.yaml
+.gitignore
