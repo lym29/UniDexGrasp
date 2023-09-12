@@ -36,7 +36,7 @@ q1:
     lambda_torque: 10
 
 # dirs
-exp_dir: ./runs/exp_tmp
+exp_dir: ./runs/eval
 
 # wandb
 wandb_offline: True
@@ -45,11 +45,11 @@ wandb_debug_mode: True  # and only program error will be reported
 resume_epoch: -1
 
 # device
-cuda_id: 0
+cuda_id: 5
 
 # data loader
 num_workers: 1
-batch_size: 16
+batch_size: 8
 n_samples: 100
 
 # hydra
