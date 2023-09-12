@@ -106,6 +106,10 @@ def main(cfg):
         result.append(data)
 
     result = flatten_result(result)
+    
+    logger.info([f"{key}: {result[key]}\n" for key in result])
+    logger.info("\n")
+    
 
     hand_model = tta_loss.hand_model
     object_model = KaolinModel(

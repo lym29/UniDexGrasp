@@ -48,7 +48,7 @@ resume_epoch: -1
 cuda_id: 1
 
 # data loader
-num_workers: 1
+num_workers: 0
 batch_size: 8
 n_samples: 100
 
