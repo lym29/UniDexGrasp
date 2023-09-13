@@ -78,6 +78,7 @@ def main(cfg):
                 pred_dict, _ = trainer.test(data)
                 data.update(pred_dict)
                 result.append({k: v.cpu() if type(v) == torch.Tensor else v for k, v in data.items()})
+        torch.save(result, os.path.join(cfg['exp_dir'], "result", f"{key}.pt"))
     
     # tta
     loader = result_to_loader(result, cfg, cfg['tta']['batch_size'])
@@ -112,6 +113,8 @@ def main(cfg):
             logger.info("\n")
 
     result = flatten_result(result)
+    torch.save(result, os.path.join(cfg['exp_dir'], "result", "tta.pt"))
+    
     
 
     hand_model = tta_loss.hand_model
@@ -130,6 +133,10 @@ def main(cfg):
 
     output_result(seen_result, 'seen')
     output_result(unseen_result, 'unseen')
+    
+    torch.save(seen_result, os.path.join(cfg['exp_dir'], "result", "seen_result.pt"))
+    torch.save(unseen_result, os.path.join(cfg['exp_dir'], "result", "unseen_result.pt"))
+    
 
 
 def divide(data):
