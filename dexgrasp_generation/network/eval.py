@@ -62,7 +62,7 @@ def main(cfg):
         contact_cfg['device'] = cfg['device']
     contact_net = ContactMapNet(contact_cfg).to(cfg['device'])
     contact_net.eval()
-    tta_loss = AdditionalLoss(cfg['tta'], 
+    tta_loss = AdditionalLoss(cfg['tta'],
                               cfg['device'], 
                               cfg['dataset']['num_obj_points'], 
                               cfg['dataset']['num_hand_points'], contact_net)
@@ -104,11 +104,14 @@ def main(cfg):
 
         data['tta_hand_pose'] = add_rotation_to_hand_pose(hand_pose.detach().cpu(), data['sampled_rotation'])
         result.append(data)
+        
+        if i % 100 == 0:
+            eval_result(cfg['q1'], {k: data[k] for k in data.keys()}, hand_model, object_model, cfg['device'])
+            logger.info(result)
+            logger.info([f"{key}: {result[key]}\n" for key in result])
+            logger.info("\n")
 
     result = flatten_result(result)
-    
-    logger.info([f"{key}: {result[key]}\n" for key in result])
-    logger.info("\n")
     
 
     hand_model = tta_loss.hand_model
