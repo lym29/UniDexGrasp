@@ -2,7 +2,6 @@
 tensorboard
 tensorboard/\*
 dexgrasp_generation/runs
-slurm_scripts/
 
 
 

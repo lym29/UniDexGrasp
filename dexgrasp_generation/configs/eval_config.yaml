@@ -7,7 +7,7 @@ defaults:
 models:
     rotation: 
         type: ipdf
-        sample_num: 2
+        sample_num: 1
     pose: 
         type: glow
         sample_num: 1
@@ -36,7 +36,7 @@ q1:
     lambda_torque: 10
 
 # dirs
-exp_dir: ./runs/eval_gpu1
+exp_dir: ./runs/eval
 
 # wandb
 wandb_offline: True
