@@ -7,7 +7,7 @@ defaults:
 models:
     rotation: 
         type: ipdf
-        sample_num: 1
+        sample_num: 2
     pose: 
         type: glow
         sample_num: 1
