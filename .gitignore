@@ -1,3 +1,10 @@
+*.pt
+tensorboard
+tensorboard/\*
+dexgrasp_generation/runs
+slurm_scripts/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -145,3 +152,6 @@ exp
 logs/
 
 dexgrasp_generation/thirdparty/CSDF
+dexgrasp_generation/configs/eval_config.yaml
+.gitignore
+dexgrasp_generation/checkpoints

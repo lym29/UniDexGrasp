@@ -158,8 +158,8 @@ class IPDFFullNet(nn.Module):
         :return: [B, 3, 3]
         """
         obj_pc = inputs["obj_pc"]  # [B, NO, 3]
-        feat = self.backbone(obj_pc).reshape(len(obj_pc), -1)   # [B, 128]
-        assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
+        feat = self.backbone(obj_pc).reshape(len(obj_pc), -1)   # [B, 128] yumeng: changed to [B, 64]
+        # assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
 
         if sample_times is None:
             batch_size = feat.shape[0]
