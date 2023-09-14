@@ -78,6 +78,7 @@ class IPDFFullNet(nn.Module):
             self.len_query = self.len_rotation * number_fourier_components * 2  # 18?
 
         self.implicit_model = ImplicitModel(self.len_query, cfg)
+        print("ImplicitModel len_query: ", self.len_query)
 
         self.num_train_queries = cfg["model"]["num_train_queries"]
         self.pre_generated_grid_queries = self.generate_queries(self.num_train_queries, mode="grid")  # [num, 3 ,3]
@@ -102,6 +103,7 @@ class IPDFFullNet(nn.Module):
 
         feat = self.backbone(obj_pc)  # [B, 128]
         assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
+        print("IPDFFullNet-forward-feat", feat.shape)
 
         gt_r = inputs["world_frame_hand_rotation_mat"]  # [B, 3, 3]
         query_rotations = self.generate_queries(self.num_train_queries)  # [num, 3, 3]
@@ -130,6 +132,7 @@ class IPDFFullNet(nn.Module):
         obj_pc = inputs["obj_pc"]
         feat = self.backbone(obj_pc).reshape(len(obj_pc), -1)   # [B, 128]
         assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
+        print("IPDFFullNet-predict-rotation-feat", feat.shape)
 
         batch_size = feat.shape[0]
 
@@ -160,12 +163,15 @@ class IPDFFullNet(nn.Module):
         obj_pc = inputs["obj_pc"]  # [B, NO, 3]
         feat = self.backbone(obj_pc).reshape(len(obj_pc), -1)   # [B, 128]
         assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
+        print("IPDFFullNet-sample-rotation-feat", feat.shape)
 
         if sample_times is None:
             batch_size = feat.shape[0]
         elif isinstance(sample_times, int):
-            batch_size = sample_times
-            feat = feat.expand(sample_times, -1)
+            # batch_size = feat.shape[0] * sample_times
+            # feat = feat.repeat(sample_times, sample_times)
+            batch_size = feat.shape[0]
+            feat = feat.expand(sample_times,  -1)
         else:
             raise ValueError(f"Invalid sample_times: {sample_times}")
 
@@ -176,6 +182,8 @@ class IPDFFullNet(nn.Module):
                                                            self.len_rotation)  # [B, num, 9]
         query_rotations_embedded = self.positional_encoding(query_rotations_embedded)  # [B, num, 18]
 
+        print("IPDFFullNet-sample-rotation-feat-expanded: ", feat.shape)
+        
         probs = self.implicit_model(feat, query_rotations_embedded)  # [B, num]
         probs = torch.nn.functional.softmax(probs, dim=1)  # [B, num]
         probs = probs * (query_rotations.shape[1] / np.pi ** 2)  # [B, num]
@@ -360,9 +368,10 @@ class ImplicitModel(nn.Module):
 
         self.mlp_layer_sizes = cfg["model"]["mlp_layer_sizes"]  # [256, 256, 256]
         if cfg["model"]["network"]["type"] == "epn_net":
-            self.input_feat_dim = cfg["model"]["network"]["equi_feat_mlps"][-1]  # 64
+            self.input_feat_dim = cfg["model"]["network"]["equi_feat_mlps"][-1]  # 64? yumeng: set to 128 in config file
         elif cfg["model"]["network"]["type"] in ["pn_rotation_net", "kpconv_rot_net"]:
             self.input_feat_dim = 128
+        print(cfg["model"]["network"])
         self.query_dim = len_query  # 18
         self.out_dim = 1  # since we just want a prob
 
@@ -387,7 +396,8 @@ class ImplicitModel(nn.Module):
         :return: [B, nn]
         """
         query_embedded = query_embedded.transpose(-1, -2).contiguous()  # [B, 18, nn]
-
+        print("IPDF-ImplicitModel-feat-shape: ", feat.shape)
+        print(self.feat_mlp.weight.shape)
         feat = self.feat_mlp(feat)  # [B, 256]
         query_embedded = self.query_mlp(query_embedded)  # [B, 256, nn]
 
