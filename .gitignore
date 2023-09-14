@@ -2,6 +2,8 @@
 tensorboard
 tensorboard/\*
 dexgrasp_generation/runs
+*.err
+*.out
 
 
 
