@@ -1,6 +1,6 @@
 network:
   type: epn_net
-  equi_feat_mlps: [128, 128, 64]
+  equi_feat_mlps: [64, 64, 64]
   # type: pn_rotation_net
 
 number_fourier_components: 1

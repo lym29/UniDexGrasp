@@ -41,6 +41,7 @@ def log_tensorboard(writer, mode, loss_dict, cnt, epoch):
 
 def main(cfg):
     cfg = process_config(cfg)
+    print(cfg)
 
     """ Logging """
     log_dir = cfg["exp_dir"]
@@ -62,6 +63,7 @@ def main(cfg):
     test_loader = get_dex_dataloader(cfg, "test")
 
     """ Trainer """
+    print("init trainer")
     trainer = Trainer(cfg, logger)
     start_epoch = trainer.resume()
 
@@ -79,6 +81,8 @@ def main(cfg):
         log_tensorboard(writer, mode, test_loss, cnt, iteration)
 
     """ Train """
+    print("start training")
+    
     # Upon SIGINT, it will save the current model before exiting
     with InterruptHandler() as h:
         train_loss = {}
