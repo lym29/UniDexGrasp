@@ -63,6 +63,7 @@ class DexGlowNet(nn.Module):
             raise NotImplementedError(f"backbone {cfg['model']['network']['type']} not implemented")
         
         self.sample_num = cfg["model"]["sample_num"]
+        print(self.sample_num)
 
         '''
         self.hand_model = HandModel(

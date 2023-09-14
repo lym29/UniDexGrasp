@@ -36,7 +36,7 @@ q1:
     lambda_torque: 10
 
 # dirs
-exp_dir: ./runs/eval
+exp_dir: ./runs/eval_gpu1
 
 # wandb
 wandb_offline: True
@@ -45,7 +45,7 @@ wandb_debug_mode: True  # and only program error will be reported
 resume_epoch: -1
 
 # device
-cuda_id: 2
+cuda_id: 1
 
 # data loader
 num_workers: 0
