@@ -368,7 +368,7 @@ class ImplicitModel(nn.Module):
 
         self.mlp_layer_sizes = cfg["model"]["mlp_layer_sizes"]  # [256, 256, 256]
         if cfg["model"]["network"]["type"] == "epn_net":
-            self.input_feat_dim = cfg["model"]["network"]["equi_feat_mlps"][-1]  # 64? yumeng: set to 128 in config file
+            self.input_feat_dim = cfg["model"]["network"]["equi_feat_mlps"][-1]  # 64? yumeng: set to [128,128,64] in config file
         elif cfg["model"]["network"]["type"] in ["pn_rotation_net", "kpconv_rot_net"]:
             self.input_feat_dim = 128
         print(cfg["model"]["network"])
@@ -398,6 +398,9 @@ class ImplicitModel(nn.Module):
         query_embedded = query_embedded.transpose(-1, -2).contiguous()  # [B, 18, nn]
         print("IPDF-ImplicitModel-feat-shape: ", feat.shape)
         print(self.feat_mlp.weight.shape)
+        # feat = feat.expand(-1, self.input_feat_dim)
+        feat = feat[:, :self.input_feat_dim]
+        print("IPDF-ImplicitModel-feat-shape: ", feat.shape)
         feat = self.feat_mlp(feat)  # [B, 256]
         query_embedded = self.query_mlp(query_embedded)  # [B, 256, nn]
 
