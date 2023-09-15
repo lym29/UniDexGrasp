@@ -18,3 +18,7 @@
 2023-09-15 13:48:21,577 - EvalModel - INFO - Resume from epoch 1750
 2023-09-15 14:11:21,932 - EvalModel - INFO - Resume from epoch 33
 2023-09-15 14:11:23,382 - EvalModel - INFO - Resume from epoch 1750
+2023-09-15 14:56:44,944 - EvalModel - INFO - Resume from epoch 33
+2023-09-15 14:56:46,479 - EvalModel - INFO - Resume from epoch 1750
+2023-09-15 15:12:21,370 - EvalModel - INFO - Resume from epoch 33
+2023-09-15 15:12:22,825 - EvalModel - INFO - Resume from epoch 1750
