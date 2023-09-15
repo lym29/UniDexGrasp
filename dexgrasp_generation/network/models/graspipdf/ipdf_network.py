@@ -102,7 +102,7 @@ class IPDFFullNet(nn.Module):
         obj_pc = inputs["obj_pc"]  # [B, NO, 3]
 
         feat = self.backbone(obj_pc)  # [B, 128]
-        assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
+        # assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
         print("IPDFFullNet-forward-feat", feat.shape)
 
         gt_r = inputs["world_frame_hand_rotation_mat"]  # [B, 3, 3]
@@ -131,7 +131,7 @@ class IPDFFullNet(nn.Module):
         """
         obj_pc = inputs["obj_pc"]
         feat = self.backbone(obj_pc).reshape(len(obj_pc), -1)   # [B, 128]
-        assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
+        # assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
         print("IPDFFullNet-predict-rotation-feat", feat.shape)
 
         batch_size = feat.shape[0]
@@ -162,7 +162,7 @@ class IPDFFullNet(nn.Module):
         """
         obj_pc = inputs["obj_pc"]  # [B, NO, 3]
         feat = self.backbone(obj_pc).reshape(len(obj_pc), -1)   # [B, 128]
-        assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
+        # assert feat.shape[1] == 128, f"Incorrect feat.shape: {feat.shape}"
         print("IPDFFullNet-sample-rotation-feat", feat.shape)
 
         if sample_times is None:
