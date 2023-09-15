@@ -83,7 +83,6 @@ def main(cfg):
                 pred_dict, _ = trainer.test(data)
                 data.update(pred_dict)
                 result.append({k: v.cpu() if type(v) == torch.Tensor else v for k, v in data.items()})
-            break
                 
         torch.save(result, f"{log_dir}/{key}.pt")
     
