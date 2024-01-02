@@ -178,6 +178,7 @@ class ShadowHandRandomLoadVision(BaseTask):
         self.z_unit_tensor = to_torch([0, 0, 1], dtype=torch.float, device=self.device).repeat((self.num_envs, 1))
         self.reset_goal_buf = self.reset_buf.clone()
         self.successes = torch.zeros(self.num_envs, dtype=torch.float, device=self.device)
+        self.current_successes = torch.zeros(self.num_envs, dtype=torch.float, device=self.device)
         self.consecutive_successes = torch.zeros(1, dtype=torch.float, device=self.device)
         self.av_factor = to_torch(self.av_factor, dtype=torch.float, device=self.device)
         self.apply_forces = torch.zeros((self.num_envs, self.num_bodies, 3), device=self.device, dtype=torch.float)
@@ -262,6 +263,7 @@ class ShadowHandRandomLoadVision(BaseTask):
 
         self.goal_cond = self.cfg["env"]["goal_cond"]
         self.random_prior = self.cfg['env']['random_prior']
+        self.random_time = self.cfg['env']['random_time']
         self.target_qpos = torch.zeros((self.num_envs, 22), device=self.device)
         self.target_hand_pos = torch.zeros((self.num_envs, 3), device=self.device)
         self.target_hand_rot = torch.zeros((self.num_envs, 4), device=self.device)
@@ -807,10 +809,10 @@ class ShadowHandRandomLoadVision(BaseTask):
     def compute_reward(self, actions, id=-1):
         self.dof_pos = self.shadow_hand_dof_pos
         
-        self.rew_buf[:], self.reset_buf[:], self.reset_goal_buf[:], self.progress_buf[:], self.successes[:], self.consecutive_successes[:] = compute_hand_reward(
+        self.rew_buf[:], self.reset_buf[:], self.reset_goal_buf[:], self.progress_buf[:], self.successes[:], self.current_successes[:], self.consecutive_successes[:] = compute_hand_reward(
             self.object_id_buf, self.object_init_z, self.delta_qpos, self.delta_target_hand_pos, self.delta_target_hand_rot,
             self.id, self.object_id_buf, self.dof_pos, self.rew_buf, self.reset_buf, self.reset_goal_buf,
-            self.progress_buf, self.successes, self.consecutive_successes,
+            self.progress_buf, self.successes, self.current_successes, self.consecutive_successes,
             self.max_episode_length, self.object_pos, self.object_handle_pos, self.object_back_pos, self.object_rot,
             self.goal_pos, self.goal_rot,
             self.right_hand_pos, self.right_hand_ff_pos, self.right_hand_mf_pos, self.right_hand_rf_pos,
@@ -821,6 +823,7 @@ class ShadowHandRandomLoadVision(BaseTask):
         )
 
         self.extras['successes'] = self.successes
+        self.extras['current_successes'] = self.current_successes
         self.extras['consecutive_successes'] = self.consecutive_successes
 
         if self.print_success_stat:
@@ -1217,12 +1220,12 @@ class ShadowHandRandomLoadVision(BaseTask):
         dof_vel = self.shadow_hand_dof_default_vel + self.reset_dof_vel_noise * rand_floats[:, 5 + self.num_shadow_hand_dofs:5 + self.num_shadow_hand_dofs * 2]
 
         theta = torch_rand_float(-3.14, 3.14, (len(env_ids), 1), device=self.device)[:, 0]
-        new_object_rot = quat_from_euler_xyz(self.object_init_euler_xy[:,0], self.object_init_euler_xy[:,1], theta) 
+        new_object_rot = quat_from_euler_xyz(self.object_init_euler_xy[env_ids,0], self.object_init_euler_xy[env_ids,1], theta) 
         prior_rot_z = get_euler_xyz(quat_mul(new_object_rot, self.target_hand_rot[env_ids]))[2]
 
         # coordinate transform according to theta(object)/ prior_rot_z(hand)
         self.z_theta[env_ids] = prior_rot_z
-        prior_rot_quat = quat_from_euler_xyz(torch.tensor(1.57, device=self.device).repeat(self.num_envs, 1)[:, 0], torch.zeros_like(theta), prior_rot_z)
+        prior_rot_quat = quat_from_euler_xyz(torch.tensor(1.57, device=self.device).repeat(len(env_ids), 1)[:, 0], torch.zeros_like(theta), prior_rot_z)
 
         # RandomLoad
         hand_indices = self.hand_indices[env_ids].to(torch.int32)
@@ -1268,7 +1271,11 @@ class ShadowHandRandomLoadVision(BaseTask):
                                                      gymtorch.unwrap_tensor(self.root_state_tensor),
                                                      gymtorch.unwrap_tensor(all_indices), len(all_indices))
 
-        self.progress_buf[env_ids] = 0
+        if self.random_time:
+            self.random_time = False
+            self.progress_buf[env_ids] = torch.randint(0, self.max_episode_length, (len(env_ids),), device=self.device)
+        else:
+            self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 0
         self.successes[env_ids] = 0
 
@@ -1451,7 +1458,7 @@ class ShadowHandRandomLoadVision(BaseTask):
 @torch.jit.script
 def compute_hand_reward(
         object_id_buf, object_init_z, delta_qpos, delta_target_hand_pos, delta_target_hand_rot,
-        id: int, object_id, dof_pos, rew_buf, reset_buf, reset_goal_buf, progress_buf, successes, consecutive_successes,
+        id: int, object_id, dof_pos, rew_buf, reset_buf, reset_goal_buf, progress_buf, successes, current_successes, consecutive_successes,
         max_episode_length: float, object_pos, object_handle_pos, object_back_pos, object_rot, target_pos, target_rot,
         right_hand_pos, right_hand_ff_pos, right_hand_mf_pos, right_hand_rf_pos, right_hand_lf_pos, right_hand_th_pos,
         dist_reward_scale: float, rot_reward_scale: float, rot_eps: float,
@@ -1529,10 +1536,11 @@ def compute_hand_reward(
     num_resets = torch.sum(resets)
     finished_cons_successes = torch.sum(successes * resets.float())
 
+    current_successes = torch.where(resets, successes, current_successes)
     cons_successes = torch.where(num_resets > 0, av_factor * finished_cons_successes / num_resets + (
                 1.0 - av_factor) * consecutive_successes, consecutive_successes)
 
-    return reward, resets, goal_resets, progress_buf, successes, cons_successes
+    return reward, resets, goal_resets, progress_buf, successes, current_successes, cons_successes
 
 
 @torch.jit.script
